@@ -1,0 +1,195 @@
+<?php
+// معالجة الإرسال
+$successMessage = "";
+$errorMessage = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["note"])) {
+  $message = trim($_POST["note"]);
+
+  if (!empty($message)) {
+    $to = "specialist@example.com"; 
+    $subject = "رسالة جديدة من صندوق الأمان الرقمي";
+    $body = "المحتوى:\n\n" . $message;
+    $headers = "From: no-reply@digitalsafe.org";
+
+    if (mail($to, $subject, $body, $headers)) {
+      $successMessage = "✅ تم إرسال رسالتك بأمان إلى مختص.";
+    } else {
+      $errorMessage = "⚠️ حدث خطأ أثناء إرسال البريد الإلكتروني.";
+    }
+  } else {
+    $errorMessage = "⚠️ من فضلك اكتب شيئًا قبل الإرسال.";
+  }
+}
+?>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>صندوق الأمان الرقمي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body { background:#f2f7f5; font-family:Tahoma; margin:0; padding:20px; color:#333; }
+    .container { max-width:700px; margin:auto; background:#fff; padding:30px; border-radius:15px;
+      box-shadow:0 0 15px rgba(0,0,0,0.1);}
+    h1{text-align:center;color:#5c6bc0;}
+
+    textarea{
+      width:100%; height:180px; padding:10px; border-radius:10px; border:1px solid #ddd;
+      resize:none; background:#f9f9f9; font-size:16px;
+    }
+
+    button{
+      width:100%; padding:12px; margin-top:15px; font-size:16px; border:none; border-radius:10px;
+      cursor:pointer; transition:.3s;
+    }
+    .save-btn{background:#a8dadc;color:#1d3557}
+    .message-btn{background:#ffd6a5;color:#5f370e}
+    .send-btn{background:#c8e6c9;color:#1b5e20}
+    .exit-btn{background:#ffb5a7;color:#4a0f0f}
+    .clear-btn{background:#e0e0e0;color:#000}
+
+    button:hover{opacity:.9; transform:scale(1.02);}
+
+    .support-message{
+      margin-top:15px;background:#e8f0fe;padding:15px;border-radius:8px;display:none;
+      text-align:center;font-weight:bold;
+    }
+
+    /* صندوق السبورة */
+    #drawingBox{
+      display:none;
+      margin-top:30px;
+      background:#f9f9f9;
+      padding:20px;
+      border-radius:12px;
+      border:1px solid #ddd;
+    }
+
+    canvas{
+      width:100%;
+      height:300px;
+      background:white;
+      border:1px solid #aaa;
+      border-radius:10px;
+      margin-top:10px;
+    }
+
+    .info,.about{margin-top:30px; padding:20px; border-radius:10px;}
+    .info{background:#f1f1f1}
+    .about{background:#fff3e0}
+    footer{text-align:center;margin-top:20px;font-size:14px;color:#777;}
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>صندوق الأمان الرقمي</h1>
+
+  <?php if ($successMessage): ?>
+      <div class="success" style="background:#d4edda;padding:12px;border-radius:8px;text-align:center;">
+        <?= $successMessage ?>
+      </div>
+  <?php elseif ($errorMessage): ?>
+      <div class="error" style="background:#f8d7da;padding:12px;border-radius:8px;text-align:center;">
+        <?= $errorMessage ?>
+      </div>
+  <?php endif; ?>
+
+  <form method="post">
+
+    <!-- كتابة الملاحظة -->
+    <textarea id="note" name="note" placeholder="اكتب مشاعرك هنا..."></textarea>
+
+    <!-- أزرار -->
+    <button type="button" class="save-btn" onclick="saveNote()">💾 حفظ الملاحظة</button>
+    <button type="button" class="message-btn" onclick="showMessage()">💬 كلمة دعم</button>
+    <button type="submit" class="send-btn">📨 إرسال للمختص</button>
+    <button type="button" class="exit-btn" onclick="quickExit()">🚪 خروج سريع</button>
+
+  </form>
+
+  <div id="supportMessage" class="support-message"></div>
+
+  <!-- السبورة -->
+  <div id="drawingBox">
+    <h3 style="color:#5c6bc0;">🎨 (شجرة ,بيت, شخص)  ارسم ما تشعر به</h3>
+    <canvas id="drawingBoard"></canvas>
+    <button class="clear-btn" onclick="clearCanvas()">🧽 مسح السبورة</button>
+  </div>
+
+  <!-- معلومات مهمة -->
+  <div class="info">
+    <h3>معلومات مهمة:</h3>
+    <ul>
+      <li>📞 خط نجدة الطفل: 16000</li>
+      <li>🚨 الشرطة: 122</li>
+      <li>👩‍🦰 وحدة مناهضة العنف ضد المرأة: 15115</li>
+    </ul>
+  </div>
+
+  <footer><p>© 2025 صندوق الأمان الرقمي</p></footer>
+
+</div>
+
+<script>
+  // حفظ الملاحظة
+  function saveNote(){
+    let note=document.getElementById("note").value;
+    if(note.trim()!==""){
+      localStorage.setItem("mySafeNote", note);
+      alert("تم الارسال إلى مختص, شكرا لثقتكم.");
+    } else alert("اكتب شيئًا.");
+  }
+
+  function showMessage(){
+    let msgs=[
+      "إنت قوي حتى لو مش حاسس كده 🌸",
+      "كل حاجة هتهدى واحدة واحدة 💙",
+      "إنت مش لوحدك 🌷",
+      "من حقك تطلب مساعدة 🌼"
+    ];
+    let div=document.getElementById("supportMessage");
+    div.style.display="block";
+    div.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  }
+
+  function quickExit(){ window.location.href="https://google.com"; }
+
+  // ظهور السبورة بعد الكتابة
+  document.getElementById("note").addEventListener("input", function(){
+    if(this.value.trim().length > 5){
+      document.getElementById("drawingBox").style.display="block";
+    } else {
+      document.getElementById("drawingBox").style.display="none";
+    }
+  });
+
+  // الرسم
+  const canvas=document.getElementById("drawingBoard");
+  const ctx=canvas.getContext("2d");
+  let drawing=false;
+
+  canvas.addEventListener("mousedown",()=>drawing=true);
+  canvas.addEventListener("mouseup",()=>drawing=false);
+  canvas.addEventListener("mouseleave",()=>drawing=false);
+
+  canvas.addEventListener("mousemove", function(e){
+    if(!drawing) return;
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX - rect.left;
+    const y=e.clientY - rect.top;
+    ctx.fillRect(x,y,2,2);
+  });
+
+  // مسح السبورة
+  function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+</script>
+
+</body>
+</html>
